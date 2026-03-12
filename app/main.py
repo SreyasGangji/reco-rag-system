@@ -1,14 +1,13 @@
 from fastapi import FastAPI
 from app.core.logging import setup_logging
+from app.api.routes_health import router as health_router
+from app.api.routes_recommend import router as recommend_router
 import logging
 
 setup_logging()
-
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-@app.get("/health")
-def health():
-    logger.info("Health endpoint called")
-    return {"status": "ok"}
+app.include_router(health_router)
+app.include_router(recommend_router)
