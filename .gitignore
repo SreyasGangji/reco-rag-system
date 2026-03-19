@@ -7,16 +7,18 @@ __pycache__/
 # Virtual environment
 .venv/
 venv/
+env/
+
+# Environment variables (IMPORTANT)
+.env
 
 # OS files
 .DS_Store
 Thumbs.db
 
-# Data
-data/raw/
-
-# Artifacts (models & processed files)
-artifacts/
+# IDE files
+.vscode/
+.idea/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -24,5 +26,22 @@ artifacts/
 # Logs
 *.log
 
-# Environment variables
-.env
+# Cache
+.pytest_cache/
+.cache/
+
+# Raw data (large, not needed in repo)
+data/raw/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build / dist
+build/
+dist/
+*.egg-info/
+
+# Artifacts (generated)
+artifacts/models/
+artifacts/data/

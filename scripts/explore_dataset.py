@@ -177,9 +177,11 @@ def main():
     joblib.dump(gb_model, models_dir / "gb_model.pkl")
 
     # Save supporting data artifacts
-    joblib.dump(movie_stats, data_dir / "movie_stats.pkl")
-    joblib.dump(user_stats, data_dir / "user_stats.pkl")
-    joblib.dump(items, data_dir / "items.pkl")
+    movie_stats.to_csv(data_dir / "movie_stats.csv", index=False)
+    user_stats.to_csv(data_dir / "user_stats.csv", index=False)
+    items.to_csv(data_dir / "items.csv", index=False)
+    ratings.to_csv(data_dir / "ratings.csv", index=False)
+    
     joblib.dump(features, data_dir / "features.pkl")
 
     print("\nArtifacts saved successfully.")

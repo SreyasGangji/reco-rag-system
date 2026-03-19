@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# Cache
+.pytest_cache/
+.cache/
+
+# Raw data (not needed in container)
+data/raw/
+
+# Temp files
+*.tmp
+*.temp
+
+# Tests (optional)
+tests/
+
+# Build files
+build/
+dist/
+*.egg-info/

@@ -1,7 +1,8 @@
 from pathlib import Path
 import joblib
 import pandas as pd
-
+from app.services.retrieval_service import retrieval_service
+from app.services.explanation_service import explanation_service
 
 class RecommendationService:
     def __init__(self):
@@ -14,17 +15,14 @@ class RecommendationService:
         self.gb_model = joblib.load(models_dir / "gb_model.pkl")
 
         # Load supporting data artifacts
-        self.movie_stats = joblib.load(data_dir / "movie_stats.pkl")
-        self.user_stats = joblib.load(data_dir / "user_stats.pkl")
-        self.items = joblib.load(data_dir / "items.pkl")
+        self.movie_stats = pd.read_csv(data_dir / "movie_stats.csv")
+        self.user_stats = pd.read_csv(data_dir / "user_stats.csv")
+        self.items = pd.read_csv(data_dir / "items.csv")
         self.features = joblib.load(data_dir / "features.pkl")
+        self.movie_corpus = pd.read_csv(Path("artifacts/data/movie_corpus.csv"))
 
         # Load ratings so we know which movies a user already rated
-        self.ratings = pd.read_csv(
-            Path("data/raw/ml-100k/u.data"),
-            sep="\t",
-            names=["user_id", "movie_id", "rating", "timestamp"]
-        )
+        self.ratings = pd.read_csv(data_dir / "ratings.csv")
 
     def user_exists(self, user_id: int) -> bool:
         return user_id in self.user_stats["user_id"].values
@@ -80,16 +78,45 @@ class RecommendationService:
 
         # Add titles
         recommendations = recommendations.merge(
-            self.items,
+            self.movie_corpus[["movie_id", "title", "genres_text", "combined_text"]],
             on="movie_id",
             how="left"
         )
 
+    
         # Format result
-        output = recommendations[["movie_id", "title", "predicted_rating"]].copy()
+        output = recommendations[["movie_id", "title", "predicted_rating", "genres_text", "combined_text"]].copy()
         output["predicted_rating"] = output["predicted_rating"].round(3)
 
-        return output.to_dict(orient="records")
+        results = []
+        for _, row in output.iterrows():
+            similar_movies = retrieval_service.search_similar_movies(
+                row["combined_text"],
+                k=3
+            )
+
+            # remove self-match if present
+            similar_titles = [
+                m["title"]
+                for m in similar_movies
+                if m["movie_id"] != row["movie_id"]
+            ][:2]
+
+            explanation = explanation_service.build_explanation(
+                title=row["title"],
+                predicted_rating=float(row["predicted_rating"]),
+                similar_context=similar_titles
+            )    
+
+            results.append({
+                "movie_id": int(row["movie_id"]),
+                "title": row["title"],
+                "predicted_rating": float(row["predicted_rating"]),
+                "similar_context": similar_titles,
+                "explanation": explanation
+            })
+
+        return results
 
 
 recommendation_service = RecommendationService()
